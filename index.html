@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>John — Data Science & Food Safety</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a28;
+            --bg-accent: #22223a;
+            --text-primary: #e8e6e3;
+            --text-secondary: #8b8b9e;
+            --text-muted: #5a5a72;
+            --accent-gold: #d4a853;
+            --accent-blue: #4a7cff;
+            --accent-green: #38c97a;
+            --accent-red: #ff4d4d;
+            --accent-orange: #ff9f43;
+            --border: #2a2a3d;
+            --font-display: 'DM Serif Display', Georgia, serif;
+            --font-body: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* ── NOISE OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* ── NAVIGATION ── */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+        }
+
+        nav .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            color: var(--accent-gold);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        nav .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+
+        nav .nav-links a:hover { color: var(--accent-gold); }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse 600px 400px at 20% 50%, rgba(74, 124, 255, 0.06), transparent),
+                radial-gradient(ellipse 500px 300px at 80% 30%, rgba(212, 168, 83, 0.05), transparent);
+        }
+
+        .hero-content {
+            max-width: 900px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+            padding: 0.4rem 1rem;
+            border: 1px solid rgba(212, 168, 83, 0.3);
+            border-radius: 2px;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            line-height: 1.15;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 650px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.8;
+        }
+
+        .hero-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.8rem;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.03em;
+        }
+
+        .btn-primary {
+            background: var(--accent-gold);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover {
+            background: #e0b85e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(212, 168, 83, 0.2);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        /* ── SECTION LAYOUT ── */
+        section {
+            padding: 5rem 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--accent-gold);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 3rem;
+            font-size: 1.05rem;
+        }
+
+        /* ── SKILLS BAR ── */
+        .skills-section {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .skill-chip {
+            background: var(--bg-accent);
+            border: 1px solid var(--border);
+            padding: 1rem 1.2rem;
+            border-radius: 6px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .skill-chip:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-3px);
+        }
+
+        .skill-chip .skill-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .skill-chip .skill-name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .skill-chip .skill-level {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            margin-top: 0.3rem;
+        }
+
+        /* ── PROJECT CARDS ── */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-gold), var(--accent-blue));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(212, 168, 83, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .project-card:hover::before { opacity: 1; }
+
+        .project-tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--accent-blue);
+            background: rgba(74, 124, 255, 0.1);
+            padding: 0.25rem 0.6rem;
+            border-radius: 3px;
+            margin-bottom: 1rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .project-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            line-height: 1.3;
+        }
+
+        .project-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 1.2rem;
+            line-height: 1.7;
+        }
+
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .project-tech span {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            background: var(--bg-accent);
+            padding: 0.2rem 0.6rem;
+            border-radius: 3px;
+        }
+
+        .project-link {
+            color: var(--accent-gold);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            transition: gap 0.3s;
+        }
+
+        .project-link:hover { gap: 0.6rem; }
+
+        /* ── CASE STUDY (FEATURED) ── */
+        .case-study {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .case-study-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .case-header {
+            background: linear-gradient(135deg, rgba(74, 124, 255, 0.1), rgba(212, 168, 83, 0.08));
+            padding: 2.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .case-header .featured-badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--accent-gold);
+            background: rgba(212, 168, 83, 0.15);
+            padding: 0.3rem 0.8rem;
+            border-radius: 3px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .case-header h3 {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            margin-bottom: 0.8rem;
+        }
+
+        .case-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 700px;
+        }
+
+        .case-body {
+            padding: 2.5rem;
+        }
+
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .case-block h4 {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .case-block p, .case-block ul {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .case-block ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .case-block ul li {
+            padding-left: 1.2rem;
+            position: relative;
+            margin-bottom: 0.3rem;
+        }
+
+        .case-block ul li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-gold);
+            font-size: 0.8rem;
+        }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .metric-item {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-accent);
+            border-radius: 6px;
+        }
+
+        .metric-item .metric-value {
+            font-family: var(--font-display);
+            font-size: 1.8rem;
+            color: var(--accent-gold);
+        }
+
+        .metric-item .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+            font-family: var(--font-mono);
+            letter-spacing: 0.05em;
+        }
+
+        /* ── CONTACT ── */
+        .contact-links {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .contact-link:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-2px);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── ANIMATIONS ── */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            nav .nav-links { display: none; }
+            .hero { padding: 5rem 1.5rem 3rem; }
+            .projects-grid { grid-template-columns: 1fr; }
+            .case-grid { grid-template-columns: 1fr; }
+            .metrics-row { grid-template-columns: repeat(2, 1fr); }
+            section { padding: 3rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+    <div class="nav-inner">
+        <a href="#" class="logo">J.</a>
+        <ul class="nav-links">
+            <li><a href="#proyectos">Proyectos</a></li>
+            <li><a href="#caso-estudio">Caso de Estudio</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-content fade-in">
+        <span class="hero-tag">Data Science · Food Safety · Quality</span>
+        <h1>Transformando datos de calidad en <span class="highlight">decisiones de negocio</span></h1>
+        <p class="hero-desc">
+            Ingeniero Agrónomo y Data Scientist en formación, especializado en seguridad alimentaria
+            y calidad en cadenas de suministro QSR. Convierto datos de auditorías, reclamos y
+            operaciones en insights accionables.
+        </p>
+        <div class="hero-links">
+            <a href="#caso-estudio" class="btn btn-primary">Ver caso de estudio →</a>
+            <a href="https://linkedin.com/in/tu-perfil" class="btn btn-outline" target="_blank">LinkedIn</a>
+            <a href="https://github.com/tu-usuario" class="btn btn-outline" target="_blank">GitHub</a>
+        </div>
+    </div>
+</section>
+
+<!-- SKILLS -->
+<section class="skills-section" id="skills">
+    <div class="container">
+        <p class="section-label">// Stack técnico</p>
+        <h2 class="section-title">Herramientas & Tecnologías</h2>
+        <div class="skills-grid" style="margin-top: 2rem;">
+            <div class="skill-chip">
+                <div class="skill-icon">🐍</div>
+                <div class="skill-name">Python</div>
+                <div class="skill-level">Intermedio</div>
+            </div>
+            <div class="skill-chip">
+                <div class="skill-icon">📊</div>
+                <div class="skill-name">Pandas / NumPy</div>
+                <div class="skill-level">Intermedio</div>
+            </div>
+            <div class="skill-chip">
+                <div class="skill-icon">📈</div>
+                <div class="skill-name">Plotly / Matplotlib</div>
+                <div class="skill-level">Intermedio</div>
+            </div>
+            <div class="skill-chip">
+                <div class="skill-icon">🤖</div>
+                <div class="skill-name">Scikit-learn</div>
+                <div class="skill-level">Básico-Intermedio</div>
+            </div>
+            <div class="skill-chip">
+                <div class="skill-icon">🧠</div>
+                <div class="skill-name">TensorFlow / Keras</div>
+                <div class="skill-level">Básico</div>
+            </div>
+            <div class="skill-chip">
+                <div class="skill-icon">🌐</div>
+                <div class="skill-name">Streamlit</div>
+                <div class="skill-level">Intermedio</div>
+            </div>
+            <div class="skill-chip">
+                <div class="skill-icon">🗄️</div>
+                <div class="skill-name">SQL</div>
+                <div class="skill-level">Básico</div>
+            </div>
+            <div class="skill-chip">
+                <div class="skill-icon">📋</div>
+                <div class="skill-name">Excel Avanzado</div>
+                <div class="skill-level">Avanzado</div>
+            </div>
+            <div class="skill-chip">
+                <div class="skill-icon">🔬</div>
+                <div class="skill-name">Seguridad Alimentaria</div>
+                <div class="skill-level">Avanzado</div>
+            </div>
+            <div class="skill-chip">
+                <div class="skill-icon">📝</div>
+                <div class="skill-name">ISO 22000 / HACCP</div>
+                <div class="skill-level">Avanzado</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="proyectos">
+    <div class="container">
+        <p class="section-label">// Portafolio</p>
+        <h2 class="section-title">Proyectos Destacados</h2>
+        <p class="section-desc">Proyectos que combinan análisis de datos con conocimiento de dominio en calidad y seguridad alimentaria.</p>
+
+        <div class="projects-grid">
+            <!-- Proyecto 1 -->
+            <div class="project-card fade-in">
+                <span class="project-tag">Data Pipeline</span>
+                <h3>Análisis de Auditorías MIP</h3>
+                <p>Pipeline de análisis de auditorías de Manejo Integrado de Plagas para +276 locales QSR.
+                   Extracción automática de datos desde PDF, análisis de correlación cuadrante higiene-plagas,
+                   y generación de reportes ejecutivos.</p>
+                <div class="project-tech">
+                    <span>Python</span><span>pdfplumber</span><span>Pandas</span>
+                    <span>Plotly</span><span>Excel</span><span>Word</span>
+                </div>
+                <a href="#" class="project-link">Ver proyecto →</a>
+            </div>
+
+            <!-- Proyecto 2 -->
+            <div class="project-card fade-in">
+                <span class="project-tag">Machine Learning</span>
+                <h3>Segmentación de Clientes</h3>
+                <p>Segmentación no supervisada de clientes e-commerce usando K-Means y DBSCAN con reducción
+                   de dimensionalidad (PCA, t-SNE). Identificación de 4 clusters con perfiles de comportamiento
+                   diferenciados para estrategias de marketing.</p>
+                <div class="project-tech">
+                    <span>Python</span><span>Scikit-learn</span><span>K-Means</span>
+                    <span>DBSCAN</span><span>PCA</span><span>t-SNE</span>
+                </div>
+                <a href="#" class="project-link">Ver proyecto →</a>
+            </div>
+
+            <!-- Proyecto 3 -->
+            <div class="project-card fade-in">
+                <span class="project-tag">Deep Learning</span>
+                <h3>Clasificador de Imágenes CNN</h3>
+                <p>Red neuronal convolucional para clasificación de prendas de vestir (Fashion-MNIST, 10 categorías).
+                   Arquitectura CNN con capas convolucionales, max pooling y dropout, alcanzando alta precisión
+                   en el conjunto de test.</p>
+                <div class="project-tech">
+                    <span>Python</span><span>TensorFlow</span><span>Keras</span>
+                    <span>CNN</span><span>Fashion-MNIST</span>
+                </div>
+                <a href="#" class="project-link">Ver proyecto →</a>
+            </div>
+
+            <!-- Proyecto 4 -->
+            <div class="project-card fade-in">
+                <span class="project-tag">Estadística</span>
+                <h3>Inferencia Estadística en Salud</h3>
+                <p>Análisis estadístico completo aplicado a datos de salud: desde distribuciones de probabilidad
+                   hasta pruebas de hipótesis (t-test, chi-cuadrado, ANOVA). Proyecto integral que cubre
+                   6 lecciones del módulo de inferencia.</p>
+                <div class="project-tech">
+                    <span>Python</span><span>SciPy</span><span>Statsmodels</span>
+                    <span>Matplotlib</span><span>Seaborn</span>
+                </div>
+                <a href="#" class="project-link">Ver proyecto →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CASE STUDY -->
+<section class="case-study" id="caso-estudio">
+    <div class="container">
+        <p class="section-label">// Caso de estudio destacado</p>
+        <h2 class="section-title">Proyecto Principal</h2>
+
+        <div class="case-study-card fade-in" style="margin-top: 2rem;">
+            <div class="case-header">
+                <span class="featured-badge">★ Caso de Estudio</span>
+                <h3>Supply Chain Quality Monitor</h3>
+                <p>Pipeline de monitoreo de calidad en cadena de suministro QSR con motor de scoring
+                   de riesgo compuesto y dashboard interactivo.</p>
+            </div>
+
+            <div class="case-body">
+                <div class="case-grid">
+                    <div class="case-block">
+                        <h4>Descripción</h4>
+                        <p>Sistema integral que cruza datos de proveedores, auditorías de calidad, reclamos
+                           y registros de entrega para calcular un score de riesgo compuesto por proveedor
+                           en una cadena de restaurantes QSR. Incluye un dashboard interactivo con filtros
+                           dinámicos y un motor de alertas automáticas.</p>
+                    </div>
+
+                    <div class="case-block">
+                        <h4>Desafío Principal</h4>
+                        <p>Integrar información fragmentada de múltiples fuentes (auditorías, reclamos, entregas,
+                           certificaciones) en un modelo unificado de evaluación de riesgo que permita identificar
+                           proveedores problemáticos de forma proactiva, antes de que los incidentes de calidad
+                           impacten la operación.</p>
+                    </div>
+
+                    <div class="case-block">
+                        <h4>Solución Propuesta</h4>
+                        <p>Motor de scoring multidimensional que pondera 4 ejes: auditorías (40%), reclamos (30%),
+                           entregas (20%) y certificación (10%). Cada dimensión genera un sub-score basado en
+                           variables específicas. El resultado es un Risk Score de 0-100 con clasificación
+                           automática y alertas por proveedor.</p>
+                    </div>
+
+                    <div class="case-block">
+                        <h4>Herramientas Utilizadas</h4>
+                        <ul>
+                            <li>Python (Pandas, NumPy) — procesamiento de datos</li>
+                            <li>Plotly — visualizaciones interactivas</li>
+                            <li>Streamlit — dashboard web</li>
+                            <li>Jupyter Notebook — análisis documentado</li>
+                            <li>Git/GitHub — control de versiones</li>
+                        </ul>
+                    </div>
+
+                    <div class="case-block">
+                        <h4>Aprendizajes Clave</h4>
+                        <ul>
+                            <li>Diseño de modelos de scoring compuesto con pesos ajustables</li>
+                            <li>Construcción de pipelines ETL con múltiples fuentes de datos</li>
+                            <li>Desarrollo de dashboards interactivos profesionales</li>
+                            <li>Traducción de conocimiento de dominio en lógica analítica</li>
+                            <li>Análisis de sensibilidad para validar robustez del modelo</li>
+                        </ul>
+                    </div>
+
+                    <div class="case-block">
+                        <h4>¿Por qué este proyecto?</h4>
+                        <p>Este proyecto refleja la convergencia de mi experiencia profesional en seguridad
+                           alimentaria y calidad con mis habilidades en data science. Demuestra que puedo
+                           ir más allá del análisis técnico y construir soluciones end-to-end que resuelven
+                           problemas reales de negocio, conectando dominio de industria con herramientas
+                           analíticas modernas.</p>
+                    </div>
+                </div>
+
+                <div class="metrics-row">
+                    <div class="metric-item">
+                        <div class="metric-value">25</div>
+                        <div class="metric-label">Proveedores analizados</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">2,875</div>
+                        <div class="metric-label">Registros procesados</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">4</div>
+                        <div class="metric-label">Dimensiones de riesgo</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">33</div>
+                        <div class="metric-label">Alertas generadas</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">7</div>
+                        <div class="metric-label">Tipos de visualización</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; text-align: center;">
+                    <a href="https://github.com/tu-usuario/supply-chain-quality-monitor" class="btn btn-primary" target="_blank">Ver en GitHub →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contacto">
+    <div class="container">
+        <p class="section-label">// Contacto</p>
+        <h2 class="section-title">Hablemos</h2>
+        <p class="section-desc">Estoy buscando oportunidades en el cruce entre data science y calidad/seguridad alimentaria.
+           Si mi perfil te interesa, conectemos.</p>
+        <div class="contact-links">
+            <a href="mailto:tu-email@mail.com" class="contact-link">
+                ✉️ Email
+            </a>
+            <a href="https://linkedin.com/in/tu-perfil" class="contact-link" target="_blank">
+                💼 LinkedIn
+            </a>
+            <a href="https://github.com/tu-usuario" class="contact-link" target="_blank">
+                🐙 GitHub
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 John — Hecho con código, datos y café ☕</p>
+</footer>
+
+<!-- SCROLL ANIMATION -->
+<script>
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
